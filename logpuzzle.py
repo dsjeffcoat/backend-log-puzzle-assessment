@@ -14,20 +14,22 @@ HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
 
+__author__: "Diarte Jeffcoat w/help from Stack Overflow('https://stackoverflow.com/questions/33530725/alphabetically-sorting-urls-to-download-image') and ('https://stackoverflow.com/questions/15035123/what-command-to-use-instead-of-urllib-request-urlretrieve')"
+
 import os
 import re
 import sys
 import urllib.request
 import argparse
 
-
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    with open(filename) as f:
+        s = {i.rstrip() for i in f if 'puzzle' in i}
+    return sorted(s, key=lambda url: url[-8:-4])
 
 
 def download_images(img_urls, dest_dir):
@@ -38,9 +40,29 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        os.mkdir(dest_dir)
+    
+    index = file(os.path.join(dest_dir, 'index.html'))
+    index.write('<html><body>\n')
 
+    i = 0
+    for url in img_urls:
+        local = 'img' + str(i) + '.jpg'
+        print("Retrieving...", local)
+        print(local)
+        print(dest_dir)
+        print(url)
+        
+        response = requests.get(url)
+        if response.status_code == 200:
+            f = open(os.path.join(dest_dir, local + '.jpg'), 'wb')
+            f.write(response.content)
+            f.close()
+        index.write('<img src="%s">' % (local + ".jpg"))
+        i += 1
+    index.write("\n</body></html>\n")
+    index.close()
 
 def create_parser():
     """Creates an argument parser object."""
